@@ -1,0 +1,23 @@
+[project]
+name = "api-gateway"
+version = "0.1.0"
+description = "Text Summarizer API Gateway"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "redis[asyncio]",
+    "sqlalchemy",
+    "pydantic",
+    "pydantic-settings",
+    "httpx",
+    "python-dotenv",
+    "jinja2",
+    "python-multipart"
+]
+
+[tool.uv]
+dev-dependencies = [
+    "black",
+    "ruff"
+]

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>🧠 Text Summarizer Dashboard</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 40px auto; }
+    textarea { width: 100%; height: 100px; }
+    button { padding: 8px 14px; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+    th, td { border-bottom: 1px solid #ccc; padding: 6px; vertical-align: top; }
+    tr.done { background-color: #f5fff5; }
+    tr.queued { background-color: #fffdf5; }
+    .delete-btn { background: #ffdfdf; border: 1px solid #ffaaaa; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>🧠 Text Summarizer Dashboard</h1>
+  <textarea id="input" placeholder="Enter your text..."></textarea><br>
+  <button onclick="createTask()">Summarize</button>
+
+  <table id="tasks">
+    <thead>
+      <tr>
+        <th>ID</th><th>Status</th><th>Text</th><th>Summary</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const tbody = document.querySelector("#tasks tbody");
+
+    async function loadTasks() {
+      const res = await fetch("/tasks");
+      const data = await res.json();
+      tbody.innerHTML = "";
+      data.forEach(addOrUpdateRow);
+    }
+
+    function addOrUpdateRow(task) {
+      let row = document.getElementById(task.task_id);
+      if (!row) {
+        row = document.createElement("tr");
+        row.id = task.task_id;
+        tbody.appendChild(row);
+      }
+      row.className = task.status;
+      row.innerHTML = `
+        <td>${task.task_id}</td>
+        <td>${task.status}</td>
+        <td>${task.text || ""}</td>
+        <td>${task.summary || ""}</td>
+        <td><button class="delete-btn" onclick="deleteTask('${task.task_id}')">🗑</button></td>
+      `;
+    }
+
+    async function createTask() {
+      const text = document.getElementById("input").value.trim();
+      if (!text) return;
+      const res = await fetch("/summarize", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({text})
+      });
+      const data = await res.json();
+      addOrUpdateRow(data);
+      document.getElementById("input").value = "";
+    }
+
+    async function deleteTask(id) {
+      const res = await fetch(`/tasks/${id}`, { method: "DELETE" });
+      const result = await res.json();
+      if (result.ok) {
+        const row = document.getElementById(id);
+        if (row) row.remove();
+      }
+    }
+
+    // ---------- Live updates ----------
+    const ws = new WebSocket(`ws://${location.host}/ws`);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.event === "created" || msg.event === "updated") {
+        addOrUpdateRow(msg);
+      } else if (msg.event === "deleted") {
+        const row = document.getElementById(msg.task_id);
+        if (row) row.remove();
+      }
+    };
+
+    loadTasks();
+  </script>
+</body>
+</html>

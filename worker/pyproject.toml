@@ -1,0 +1,18 @@
+[project]
+name = "worker"
+version = "0.1.0"
+description = "Text Summarizer Worker"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "redis[asyncio]",
+    "httpx",
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
+    "openai"
+]
+
+[tool.uv]
+dev-dependencies = ["black", "ruff"]
