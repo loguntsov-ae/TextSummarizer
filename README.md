@@ -8,6 +8,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com/)
 [![Redis](https://img.shields.io/badge/Redis-7.0-red.svg)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/Tests-Pytest-green.svg)](tests/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **[Особенности](#-ключевые-особенности) • [Быстрый старт](#-быстрый-старт) • [Архитектура](#-архитектура) • [Технологии](#-технологии) • [API](#-api-endpoints)**
@@ -322,12 +323,41 @@ docker run -p 6379:6379 redis:7-alpine
 
 ### Тестирование
 
+**Установка зависимостей для тестов:**
 ```bash
-# Запустить тесты
+pip install -r requirements-test.txt
+```
+
+**Запуск тестов:**
+```bash
+# Все тесты
 make test
 
-# Проверить линтером
+# С покрытием кода
+make test-cov
+
+# Только unit тесты
+make test-unit
+
+# Или напрямую через pytest
+pytest tests/ -v
+
+# С покрытием
+pytest tests/ --cov=. --cov-report=html
+```
+
+**Проверка кода:**
+```bash
+# Линтер
 make lint
+
+# Форматирование
+make format
+```
+
+**Автоматический запуск тестов:**
+```bash
+./run_tests.sh
 ```
 
 ---

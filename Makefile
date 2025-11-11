@@ -83,20 +83,40 @@ shell-api:
 shell-worker:
 	docker-compose exec worker /bin/sh
 
-# Testing (placeholder - add tests later)
+# Testing
 test:
 	@echo "🧪 Running tests..."
-	@echo "⚠️  Tests not implemented yet"
+	pytest tests/ -v
 
-# Linting (placeholder - add linter later)
+test-cov:
+	@echo "🧪 Running tests with coverage..."
+	pytest tests/ --cov=. --cov-report=html --cov-report=term
+	@echo "📊 Coverage report generated in htmlcov/index.html"
+
+test-watch:
+	@echo "🧪 Running tests in watch mode..."
+	pytest-watch tests/
+
+test-unit:
+	@echo "🧪 Running unit tests only..."
+	pytest tests/ -v -m "not integration"
+
+test-integration:
+	@echo "🧪 Running integration tests..."
+	pytest tests/ -v -m integration
+
+# Linting
 lint:
 	@echo "🔍 Running linter..."
-	@echo "⚠️  Linter not configured yet"
+	@echo "⚠️  Install: pip install flake8 black mypy"
+	-flake8 api_gateway/ worker/ --max-line-length=100
+	-mypy api_gateway/ worker/ --ignore-missing-imports
 
-# Format code (placeholder)
+# Format code
 format:
 	@echo "✨ Formatting code..."
-	@echo "⚠️  Formatter not configured yet"
+	@echo "⚠️  Install: pip install black"
+	-black api_gateway/ worker/ tests/
 
 # Development setup
 setup:
