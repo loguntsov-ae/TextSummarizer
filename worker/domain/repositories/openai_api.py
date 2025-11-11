@@ -4,7 +4,7 @@ from settings import settings
 
 
 class OpenAIRepository(ModelRepository):
-    """Summarization через OpenAI API."""
+    """OpenAI API implementation for text summarization."""
 
     def __init__(self, model_name: str | None = None):
         self.client = AsyncOpenAI(api_key=settings.openai_api_key)

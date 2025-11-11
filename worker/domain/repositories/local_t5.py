@@ -1,7 +1,9 @@
 from domain.interfaces import ModelRepository
 
+
 class LocalT5Repository(ModelRepository):
-    """Локальная модель (пример)."""
+    """Local T5 model implementation."""
+    
     async def summarize(self, text: str) -> str:
-        # Здесь можно подключить transformers pipeline(...)
+        # TODO: Connect transformers pipeline for actual T5 summarization
         return f"[LOCAL SUMMARY]: {text[:80]}..."

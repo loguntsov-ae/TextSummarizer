@@ -4,8 +4,13 @@ from fastapi.staticfiles import StaticFiles
 from db import SessionLocal, Task
 from schemas import TaskResponse, SummarizeRequest
 from redis_client import publish_task, subscribe_results
-import uuid, asyncio
+import uuid
+import asyncio
+import logging
 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Text Summarizer API Gateway")
 
@@ -13,7 +18,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 active_connections: set[WebSocket] = set()
 
-# ---------- WebSocket notify ----------
+
 async def notify_all(message: dict):
     for ws in list(active_connections):
         try:
@@ -22,7 +27,6 @@ async def notify_all(message: dict):
             active_connections.remove(ws)
 
 
-# ---------- Redis listener ----------
 async def handle_result(message: dict):
     task_id = message["task_id"]
     summary = message["summary"]
@@ -50,7 +54,6 @@ async def startup_event():
     asyncio.create_task(subscribe_results(handle_result))
 
 
-# ---------- API ----------
 @app.post("/summarize", response_model=TaskResponse)
 async def create_task(request: SummarizeRequest):
     db = SessionLocal()
@@ -61,8 +64,6 @@ async def create_task(request: SummarizeRequest):
     db.close()
 
     await publish_task({"task_id": task_id, "text": request.text})
-
-    # уведомляем всех, что добавлена новая задача
     await notify_all({"task_id": task_id, "status": "queued", "text": request.text})
 
     return TaskResponse(task_id=task_id, status="queued")
@@ -70,7 +71,7 @@ async def create_task(request: SummarizeRequest):
 
 @app.get("/tasks", response_model=list[TaskResponse])
 async def list_tasks():
-    """Возвращает все задачи из БД."""
+    """Return all tasks from database."""
     db = SessionLocal()
     tasks = db.query(Task).order_by(Task.created_at.desc()).all()
     db.close()
@@ -96,22 +97,20 @@ async def delete_task(task_id: str):
         db.delete(task)
         db.commit()
         db.close()
-        # уведомляем всех клиентов, что задача удалена
         await notify_all({"event": "deleted", "task_id": task_id})
         return {"ok": True}
     db.close()
     return {"ok": False, "error": "not_found"}
 
 
-# ----------- WebSocket -----------
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await ws.accept()
     active_connections.add(ws)
-    print("🔌 WebSocket connected")
+    logger.info("WebSocket connected")
     try:
         while True:
-            await ws.receive_text()  # не используем, просто держим соединение
+            await ws.receive_text()
     except WebSocketDisconnect:
         active_connections.remove(ws)
-        print("❌ WebSocket disconnected")
+        logger.info("WebSocket disconnected")

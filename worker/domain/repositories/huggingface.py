@@ -4,7 +4,7 @@ from settings import settings
 
 
 class HuggingFaceRepository(ModelRepository):
-    """Реализация репозитория для Hugging Face API."""
+    """HuggingFace API implementation for text summarization."""
 
     def __init__(self, model_name: str | None = None):
         self.model_name = model_name or settings.model_name
