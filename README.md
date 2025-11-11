@@ -393,7 +393,7 @@ make format
 
 **Aleksei Loguntsov**
 
-- GitHub: [@loguntsov-ae](https://github.com/loguntsov-ae)
+- GitHub: [@loguntsovae](https://github.com/loguntsovae)
 
 ---
 
